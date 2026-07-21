@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Calculate your expected shift completion time.">
+  <title>Shift Time Calculator</title>
+  <style>
+    :root { --bg:#08111f; --card:rgba(15,27,46,.9); --field:#0b1729; --border:rgba(170,196,235,.18); --text:#f5f8ff; --muted:#aab8cf; --accent:#75b0ff; --success:#78e5aa; --danger:#ff9e9e; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; padding:24px; font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--text); background:radial-gradient(circle at 15% 15%,rgba(53,112,206,.23),transparent 34rem),radial-gradient(circle at 85% 85%,rgba(82,192,159,.12),transparent 30rem),linear-gradient(135deg,#07101d,#0b1527 50%,#101d32); }
+    .app { width:min(100%,620px); }
+    .card { overflow:hidden; border:1px solid var(--border); border-radius:24px; background:var(--card); box-shadow:0 24px 70px rgba(0,0,0,.34); backdrop-filter:blur(14px); }
+    header { padding:34px 32px 24px; border-bottom:1px solid var(--border); }
+    .eyebrow { margin:0 0 10px; color:var(--accent); font-size:.78rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+    h1 { margin:0; font-size:clamp(1.8rem,6vw,2.35rem); line-height:1.1; }
+    .subtitle { margin:10px 0 0; color:var(--muted); }
+    form { padding:28px 32px 32px; }
+    .group { margin-bottom:24px; }
+    .heading { display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:10px; }
+    label,legend { font-weight:700; font-size:.95rem; }
+    .hint,.field-label { color:var(--muted); font-size:.82rem; }
+    fieldset { margin:0; padding:0; border:0; min-width:0; }
+    .time-grid,.duration-grid { display:grid; gap:12px; }
+    .time-grid { grid-template-columns:1fr 1fr 110px; }
+    .duration-grid { grid-template-columns:1fr 1fr; }
+    .field-label { display:block; margin-bottom:8px; font-weight:650; }
+    input,select,button { font:inherit; }
+    input,select { width:100%; min-height:52px; padding:0 14px; border:1px solid var(--border); border-radius:12px; color:var(--text); background:var(--field); outline:none; transition:border-color .16s,box-shadow .16s,background .16s; }
+    .time-grid select { min-height:68px; font-size:1.15rem; font-weight:750; }
+    .duration-grid select { min-height:48px; }
+    input::placeholder { color:#71809a; }
+    input:hover,select:hover { background:#0d1b30; border-color:rgba(155,198,255,.45); }
+    input:focus,select:focus,button:focus-visible { border-color:#9bc6ff; box-shadow:0 0 0 3px rgba(103,168,255,.22); }
+    .error { min-height:1.25rem; margin:8px 0 0; color:var(--danger); font-size:.85rem; }
+    .result { margin:28px 0 24px; padding:22px; border:1px solid rgba(103,168,255,.28); border-radius:16px; background:linear-gradient(135deg,rgba(43,91,159,.27),rgba(15,31,54,.8)); }
+    .result-label { color:#c5d8f7; font-size:.84rem; font-weight:750; letter-spacing:.08em; text-transform:uppercase; }
+    .result time { display:block; margin:7px 0 5px; color:var(--success); font-size:clamp(2.2rem,9vw,3.25rem); font-weight:800; letter-spacing:-.04em; line-height:1.1; }
+    .remaining { min-height:1.3rem; margin:8px 0 0; color:var(--muted); font-size:.86rem; }
+    footer { padding:18px; color:var(--muted); text-align:center; font-size:.86rem; }
+    @media (max-width:520px) { body{padding:14px}.card{border-radius:18px}header,form{padding-left:20px;padding-right:20px}.time-grid{grid-template-columns:1fr 1fr}.time-grid select:last-child{grid-column:span 2}.duration-grid{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="card" aria-labelledby="app-title">
+      <header>
+        <p class="eyebrow">Workday planner</p>
+        <h1 id="app-title">Shift Time Calculator</h1>
+        <p class="subtitle">Find out when your workday ends.</p>
+      </header>
+      <form id="calculatorForm" novalidate>
+        <div class="group">
+          <div class="heading"><label for="entryHour">Entry Time</label><span class="hint">Select your start time</span></div>
+          <div class="time-grid">
+            <select id="entryHour" aria-label="Entry time hour" aria-describedby="timeError"></select>
+            <select id="entryMinute" aria-label="Entry time minute" aria-describedby="timeError"></select>
+            <select id="period" aria-label="Entry time period" aria-describedby="timeError"><option value="AM">AM</option><option value="PM">PM</option></select>
+          </div>
+          <p id="timeError" class="error" role="alert" aria-live="polite"></p>
+        </div>
+        <fieldset class="group">
+          <div class="heading"><legend>Shift Duration</legend><span class="hint">Default: 8h 30m</span></div>
+          <div class="duration-grid">
+            <div><label class="field-label" for="shiftHours">Hours</label><select id="shiftHours"></select></div>
+            <div><label class="field-label" for="shiftMinutes">Minutes</label><select id="shiftMinutes"></select></div>
+          </div>
+        </fieldset>
+        <section class="result" aria-live="polite" aria-atomic="true">
+          <span class="result-label">Your shift ends at:</span>
+          <time id="completionTime">—</time>
+          <p id="remainingTime" class="remaining"></p>
+        </section>
+      </form>
+    </section>
+    <footer>Plan your day, one shift at a time.</footer>
+  </main>
+  <script>
+    (() => {
+      const entryHour = document.querySelector('#entryHour'), entryMinute = document.querySelector('#entryMinute'), period = document.querySelector('#period'), hours = document.querySelector('#shiftHours'), minutes = document.querySelector('#shiftMinutes'), error = document.querySelector('#timeError'), output = document.querySelector('#completionTime'), remaining = document.querySelector('#remainingTime');
+      entryHour.add(new Option('Hour', '', true, true));
+      for(let h=1;h<=12;h++) entryHour.add(new Option(String(h).padStart(2,'0'),h));
+      entryMinute.add(new Option('Minute', '', true, true));
+      for(let m=0;m<60;m+=5) entryMinute.add(new Option(String(m).padStart(2,'0'),m));
+      for(let h=0;h<=16;h++){ const o=new Option(`${h} ${h===1?'hour':'hours'}`,h,h===8,h===8); hours.add(o); }
+      for(let m=0;m<60;m+=5){ const o=new Option(`${m} ${m===1?'minute':'minutes'}`,m,m===30,m===30); minutes.add(o); }
+      const duration = value => { const h=Math.floor(value/60), m=value%60; return `${h} ${h===1?'hour':'hours'}${m ? ` ${m} ${m===1?'minute':'minutes'}` : ''}`; };
+      const clock = value => { value=((value%1440)+1440)%1440; const h=Math.floor(value/60), m=value%60; return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`; };
+      function calculate(){
+        if(!entryHour.value || !entryMinute.value){
+          error.textContent='Please select both an hour and minute for your start time.'; entryHour.setAttribute('aria-invalid','true'); entryMinute.setAttribute('aria-invalid','true'); output.textContent='—'; remaining.textContent=''; return false;
+        }
+        error.textContent=''; entryHour.setAttribute('aria-invalid','false'); entryMinute.setAttribute('aria-invalid','false');
+        const start=(Number(entryHour.value)%12)*60+Number(entryMinute.value)+(period.value==='PM'?720:0), shift=Number(hours.value)*60+Number(minutes.value), end=start+shift, text=clock(end);
+        output.textContent=text;
+        const now=new Date(), current=now.getHours()*60+now.getMinutes(), endToday=end%1440;
+        let ends=endToday, currentRelative=current; if(ends<=start) ends+=1440; if(currentRelative<start) currentRelative+=1440;
+        const left=ends-currentRelative; remaining.textContent=left>0?`${duration(left)} remaining until the shift ends.`:'This shift has already ended for today.';
+        return true;
+      }
+      [entryHour,entryMinute,period,hours,minutes].forEach(control=>control.addEventListener('change',calculate));
+    })();
+  </script>
+</body>
+</html>
