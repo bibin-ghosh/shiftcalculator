@@ -1,0 +1,17 @@
+{
+  "name": "Shift Time Calculator",
+  "short_name": "Shift Time",
+  "description": "Calculate your expected work completion time.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#08111f",
+  "theme_color": "#08111f",
+  "icons": [
+    {
+      "src": "shift_time_calculator_icon_1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
